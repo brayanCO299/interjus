@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-// 1. LISTAR DOCUMENTOS OFICIALES
+// 1. OBTENER DOCUMENTOS
 export async function GET() {
     try {
         const result = await query(`
@@ -12,12 +12,11 @@ export async function GET() {
         `);
         return NextResponse.json({ success: true, documentos: result.rows });
     } catch (error: any) {
-        console.error("Error en GET /api/documentos:", error.message);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
 
-// 2. REGISTRAR UN NUEVO DOCUMENTO
+// 2. REGISTRAR DOCUMENTO (Base64 directo a la base de datos)
 export async function POST(request: Request) {
     try {
         const { titulo, categoria, archivo_url, usuario_id } = await request.json();
@@ -34,7 +33,6 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
-        console.error("Error en POST /api/documentos:", error.message);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

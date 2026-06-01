@@ -180,40 +180,36 @@ export default function FeedPage() {
         setSubiendoDoc(true);
 
         try {
-            // Reutilizamos tu ruta de carga actual (Sencilla y Directa)
-            const formData = new FormData();
-            formData.append('file', docArchivo);
+            // Transformamos el PDF/Documento a una cadena Base64 localmente
+            const reader = new FileReader();
+            reader.readAsDataURL(docArchivo);
 
-            const resUpload = await fetch('/api/upload', { method: 'POST', body: formData });
-            const dataUpload = await resUpload.json();
+            reader.onloadend = async () => {
+                const base64data = reader.result as string;
 
-            if (!dataUpload.success) {
-                alert("Error al procesar el archivo en el servidor.");
+                // Enviamos el texto directamente a tu base de datos de Neon
+                const resDoc = await fetch('/api/documentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        titulo: docTitulo,
+                        categoria: docCategoria,
+                        archivo_url: base64data, // Guardamos los datos puros codificados
+                        usuario_id: usuarioSesion.id
+                    })
+                });
+
+                if (resDoc.ok) {
+                    setDocTitulo('');
+                    setDocArchivo(null);
+                    if (docInputRef.current) docInputRef.current.value = '';
+                    await cargarDocumentos();
+                }
                 setSubiendoDoc(false);
-                return;
-            }
+            };
 
-            // Guardamos la referencia de texto ligera en Neon
-            const resDoc = await fetch('/api/documentos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    titulo: docTitulo,
-                    categoria: docCategoria,
-                    archivo_url: dataUpload.url,
-                    usuario_id: usuarioSesion.id
-                })
-            });
-
-            if (resDoc.ok) {
-                setDocTitulo('');
-                setDocArchivo(null);
-                if (docInputRef.current) docInputRef.current.value = '';
-                await cargarDocumentos();
-            }
         } catch (error) {
-            console.error("Error subiendo documento:", error);
-        } finally {
+            console.error("Error subiendo documento a Neon:", error);
             setSubiendoDoc(false);
         }
     };
@@ -563,14 +559,23 @@ export default function FeedPage() {
                                                 <span className="text-[10px] text-gray-400 font-semibold truncate max-w-[120px]">
                                                     👤 {doc.subido_por?.split(' ')[0]}
                                                 </span>
-                                                <a
-                                                    href={doc.archivo_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="bg-gray-900 text-white group-hover:bg-red-900 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition flex items-center gap-1.5 shadow-sm"
+                                                <button
+                                                    onClick={() => {
+                                                        // Creamos una pestaña nueva y escribimos el stream de base64 nativo
+                                                        const nuevaVentana = window.open();
+                                                        if (nuevaVentana) {
+                                                            nuevaVentana.document.write(
+                                                                `<iframe src="${doc.archivo_url}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; h-full; min-height:100vh;" allowfullscreen></iframe>`
+                                                            );
+                                                            nuevaVentana.document.title = doc.titulo;
+                                                        } else {
+                                                            alert("Por favor, permite las ventanas emergentes para ver el archivo.");
+                                                        }
+                                                    }}
+                                                    className="bg-gray-900 text-white hover:bg-red-900 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition flex items-center gap-1.5 shadow-sm cursor-pointer"
                                                 >
-                                                    <Download size={12} /> Ver / Descargar
-                                                </a>
+                                                    <Download size={12} /> Ver Documento
+                                                </button>
                                             </div>
                                         </div>
                                     ))
