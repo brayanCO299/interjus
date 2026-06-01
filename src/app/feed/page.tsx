@@ -16,7 +16,7 @@ export default function FeedPage() {
     const [cumpleaneros, setCumpleaneros] = useState<any[]>([]);
     const [notificaciones, setNotificaciones] = useState<number>(0);
     const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<any>(null);
-    
+
     // ESTADOS - ACTIVIDADES Y ALERTAS
     const [actividades, setActividades] = useState<any[]>([]);
     const [nuevaActividadTitulo, setNuevaActividadTitulo] = useState('');
@@ -42,12 +42,12 @@ export default function FeedPage() {
         const user = localStorage.getItem('interjus_user');
         if (user) {
             setUsuarioSesion(JSON.parse(user));
-            cargarPosts(true); 
+            cargarPosts(true);
             cargarCumpleaneros();
             cargarActividades();
             cargarDocumentos();
-        } else { 
-            router.push('/'); 
+        } else {
+            router.push('/');
         }
     }, [router]);
 
@@ -59,7 +59,7 @@ export default function FeedPage() {
                 cargarActividades();
                 if (activeTab === 'documentos') cargarDocumentos();
             }
-        }, 8000); 
+        }, 8000);
         return () => clearInterval(intervalo);
     }, [usuarioSesion, posts.length, activeTab]);
 
@@ -71,7 +71,7 @@ export default function FeedPage() {
 
             const res = await fetch(`/api/posts?usuario_id=${user.id}`);
             const data = await res.json();
-            
+
             if (data.success) {
                 if (!esInicial && data.posts.length > totalPostsPrevio.current) {
                     const diferencia = data.posts.length - totalPostsPrevio.current;
@@ -104,7 +104,7 @@ export default function FeedPage() {
                 const vistasString = localStorage.getItem('interjus_actividades_vistas');
                 const idsVistas: number[] = vistasString ? JSON.parse(vistasString) : [];
 
-                const pendientes = data.actividades.filter((act: any) => 
+                const pendientes = data.actividades.filter((act: any) =>
                     (act.recordar_manana || act.es_hoy) && !idsVistas.includes(act.id)
                 );
 
@@ -160,12 +160,12 @@ export default function FeedPage() {
                     tipo_media: tipoMedia
                 })
             });
-            
+
             if (resPost.ok) {
-                setNuevoTexto(''); 
+                setNuevoTexto('');
                 setArchivo(null);
                 if (fileInputRef.current) fileInputRef.current.value = '';
-                await cargarPosts(true); 
+                await cargarPosts(true);
             }
         } catch (error) {
             console.error("Error al publicar:", error);
@@ -271,7 +271,7 @@ export default function FeedPage() {
         setUsuarioSeleccionado({ nombres: nombre, area: area || 'SNEJ Sede Huampami' });
     };
 
-    const documentosFiltrados = documentos.filter(doc => 
+    const documentosFiltrados = documentos.filter(doc =>
         filtroCategoria === 'Todos' || doc.categoria === filtroCategoria
     );
 
@@ -289,7 +289,7 @@ export default function FeedPage() {
             <header className="bg-white border-b h-14 flex items-center justify-between px-6 sticky top-0 z-50 shadow-sm">
                 <div className="flex items-center gap-6">
                     <h1 className="text-2xl font-black text-red-900 tracking-tight">InterJus</h1>
-                    
+
                     {/* Filtros Administrativos Protegidos */}
                     {usuarioSesion?.rol?.toUpperCase() === 'ADMIN' && (
                         <div className="hidden md:flex items-center gap-3">
@@ -311,19 +311,19 @@ export default function FeedPage() {
                 {/* Notificaciones y Perfil */}
                 <div className="flex items-center gap-4">
                     <div className="relative">
-                        <button 
+                        <button
                             onClick={() => {
                                 setMostrarMenuNotificaciones(!mostrarMenuNotificaciones);
                                 if (notificaciones > 0) {
                                     const idsActuales = listaNotificaciones.map((a: any) => a.id);
                                     const vistasString = localStorage.getItem('interjus_actividades_vistas');
                                     const idsVistas: number[] = vistasString ? JSON.parse(vistasString) : [];
-                                    
+
                                     const unificados = Array.from(new Set([...idsVistas, ...idsActuales]));
                                     localStorage.setItem('interjus_actividades_vistas', JSON.stringify(unificados));
                                     setNotificaciones(0);
                                 }
-                            }} 
+                            }}
                             className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition"
                             title="Notificaciones"
                         >
@@ -340,7 +340,7 @@ export default function FeedPage() {
                             <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 py-2">
                                 <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
                                     <span className="font-black text-xs text-gray-800 uppercase tracking-wider">Alertas de Actividades</span>
-                                    <button onClick={() => setMostrarMenuNotificaciones(false)} className="text-gray-400 hover:text-gray-600"><X size={14}/></button>
+                                    <button onClick={() => setMostrarMenuNotificaciones(false)} className="text-gray-400 hover:text-gray-600"><X size={14} /></button>
                                 </div>
                                 <div className="max-h-64 overflow-y-auto">
                                     {listaNotificaciones.length > 0 ? (
@@ -371,19 +371,19 @@ export default function FeedPage() {
 
             {/* Layout Principal */}
             <main className="max-w-5xl mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                
+
                 {/* COLUMNA CENTRAL INTERACTIVA */}
                 <div className="md:col-span-2 space-y-5">
-                    
+
                     {/* BOTONES DE PESTAÑAS (TABS) - MINIMALISTAS Y ATRACTIVOS */}
                     <div className="bg-white p-1 rounded-xl border flex gap-1 shadow-sm">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('muro')}
                             className={`flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center justify-center gap-2 ${activeTab === 'muro' ? 'bg-red-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}
                         >
                             <Users size={16} /> Muro de Comunidad
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('documentos')}
                             className={`flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center justify-center gap-2 ${activeTab === 'documentos' ? 'bg-red-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}
                         >
@@ -406,7 +406,7 @@ export default function FeedPage() {
                                 {archivo && (
                                     <div className="relative mb-3 inline-flex items-center gap-2 bg-gray-100 p-2 rounded-lg text-xs font-medium text-gray-700">
                                         <span>📁 {archivo.name}</span>
-                                        <button onClick={() => { setArchivo(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition"><X size={12}/></button>
+                                        <button onClick={() => { setArchivo(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition"><X size={12} /></button>
                                     </div>
                                 )}
                                 <div className="flex gap-4 border-t pt-3">
@@ -471,7 +471,7 @@ export default function FeedPage() {
                     {/* VISTA 2: REPOSITORIO OFICIAL (NUEVA FUNCIONALIDAD COMPACTA) */}
                     {activeTab === 'documentos' && (
                         <div className="space-y-5 animate-in fade-in duration-200">
-                            
+
                             {/* Formulario de Carga Directa */}
                             <form onSubmit={registrarDocumentoOficial} className="bg-white p-4 rounded-xl border shadow-sm space-y-3">
                                 <div className="flex items-center gap-2 border-b pb-2">
@@ -479,16 +479,16 @@ export default function FeedPage() {
                                     <p className="text-xs font-black text-gray-800 uppercase tracking-wide">Publicar Documentación Institucional</p>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <input 
-                                        type="text" 
-                                        placeholder="Título del documento oficial..." 
-                                        value={docTitulo} 
+                                    <input
+                                        type="text"
+                                        placeholder="Título del documento oficial..."
+                                        value={docTitulo}
                                         onChange={(e) => setDocTitulo(e.target.value)}
                                         className="md:col-span-2 bg-gray-50 border p-2.5 rounded-lg text-xs outline-none text-black focus:ring-1 focus:ring-red-900"
-                                        required 
+                                        required
                                     />
-                                    <select 
-                                        value={docCategoria} 
+                                    <select
+                                        value={docCategoria}
                                         onChange={(e) => setDocCategoria(e.target.value)}
                                         className="bg-gray-50 border p-2.5 rounded-lg text-xs outline-none text-gray-700 font-bold cursor-pointer focus:ring-1 focus:ring-red-900"
                                     >
@@ -499,15 +499,15 @@ export default function FeedPage() {
                                     </select>
                                 </div>
                                 <div className="flex items-center gap-4 pt-1">
-                                    <input 
-                                        type="file" 
+                                    <input
+                                        type="file"
                                         ref={docInputRef}
                                         onChange={(e) => { if (e.target.files && e.target.files[0]) setDocArchivo(e.target.files[0]); }}
                                         className="hidden"
                                         accept=".pdf,.doc,.docx,.xls,.xlsx"
                                         required
                                     />
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => docInputRef.current?.click()}
                                         className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2"
@@ -515,9 +515,9 @@ export default function FeedPage() {
                                         {docArchivo ? '✓ Archivo Seleccionado' : '📎 Adjuntar Archivo (PDF, Word, Excel)'}
                                     </button>
                                     {docArchivo && <span className="text-xs text-gray-500 font-medium truncate max-w-xs">({docArchivo.name})</span>}
-                                    
-                                    <button 
-                                        type="submit" 
+
+                                    <button
+                                        type="submit"
                                         disabled={subiendoDoc || !docTitulo.trim() || !docArchivo}
                                         className="ml-auto bg-red-900 text-white px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-950 transition disabled:opacity-50"
                                     >
@@ -563,10 +563,10 @@ export default function FeedPage() {
                                                 <span className="text-[10px] text-gray-400 font-semibold truncate max-w-[120px]">
                                                     👤 {doc.subido_por?.split(' ')[0]}
                                                 </span>
-                                                <a 
-                                                    href={doc.archivo_url} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
+                                                <a
+                                                    href={doc.archivo_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="bg-gray-900 text-white group-hover:bg-red-900 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition flex items-center gap-1.5 shadow-sm"
                                                 >
                                                     <Download size={12} /> Ver / Descargar
@@ -606,7 +606,7 @@ export default function FeedPage() {
                                     </div>
                                 ))}
                             </div>
-                        ) : ( <p className="text-xs text-gray-400 italic text-center">No hay onomásticos.</p> )}
+                        ) : (<p className="text-xs text-gray-400 italic text-center">No hay onomásticos.</p>)}
                     </div>
 
                     {/* Actividades de Áreas */}
@@ -643,7 +643,7 @@ export default function FeedPage() {
                                     );
                                 })}
                             </div>
-                        ) : ( <p className="text-xs text-gray-400 italic text-center py-2">No hay actividades activas.</p> )}
+                        ) : (<p className="text-xs text-gray-400 italic text-center py-2">No hay actividades activas.</p>)}
                     </div>
                 </div>
             </main>
